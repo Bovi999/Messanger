@@ -1,53 +1,59 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package Messenger.resources;
 
+import Messenger.model.Profile;
+import Messenger.service.ProfileService;
+import java.util.List;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PUT;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 
-/**
- * REST Web Service
- *
- * @author Christian
- */
-@Path("/profile")
+
+@Path("/profiles")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_XML)
 public class ProfileResource {
 
     @Context
     private UriInfo context;
+    
+    ProfileService profileService = new ProfileService();
 
-    /**
-     * Creates a new instance of ProfileResource
-     */
     public ProfileResource() {
     }
 
-    /**
-     * Retrieves representation of an instance of Messenger.resources.ProfileResource
-     * @return an instance of java.lang.String
-     */
     @GET
-    @Produces(MediaType.APPLICATION_XML)
-    public String getXml() {
-        //TODO return proper representation object
-        throw new UnsupportedOperationException();
+    public List<Profile> getProfiles() {
+        return profileService.getProfiles();
+    }
+    
+    @Path("{profileName}")
+    @GET
+    public Profile getProfile(@PathParam("profileName") String profileName) {
+        return profileService.getProfile(profileName);
+    }
+    
+    @POST
+    public Profile createProfile(Profile profile){
+        return profileService.createProfile(profile);
     }
 
-    /**
-     * PUT method for updating or creating an instance of ProfileResource
-     * @param content representation for the resource
-     */
     @PUT
-    @Consumes(MediaType.APPLICATION_XML)
-    public void putXml(String content) {
+    public Profile updateProfiles(Profile profile) {
+        return profileService.updateProfile(profile);
+    }
+    
+    @Path("{profileName}")
+    @DELETE
+    public String deleteProfiles(@PathParam("profileName") String profileName) {
+        profileService.deleteProfile((profileName));
+        return "deleted";
     }
 }
