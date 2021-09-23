@@ -1,5 +1,6 @@
 package Messenger.resources;
 
+//<editor-fold defaultstate="collapsed" desc="Imports">
 import Messenger.model.Profile;
 import Messenger.service.ProfileService;
 import java.util.List;
@@ -14,7 +15,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PUT;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
-
+//</editor-fold>
 
 @Path("/profiles")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -34,10 +35,10 @@ public class ProfileResource {
         return profileService.getProfiles();
     }
     
-    @Path("{profileName}")
+    @Path("{username}")
     @GET
-    public Profile getProfile(@PathParam("profileName") String profileName) {
-        return profileService.getProfile(profileName);
+    public Profile getProfile(@PathParam("username") String username) {
+        return profileService.getProfile(username);
     }
     
     @POST
@@ -45,15 +46,17 @@ public class ProfileResource {
         return profileService.createProfile(profile);
     }
 
+    @Path("/username")
     @PUT
-    public Profile updateProfiles(Profile profile) {
+    public Profile updateProfiles(@PathParam("username") String username, Profile profile) {
+        profile.setUsername(username);
         return profileService.updateProfile(profile);
     }
     
-    @Path("{profileName}")
+    @Path("{username}")
     @DELETE
-    public String deleteProfiles(@PathParam("profileName") String profileName) {
-        profileService.deleteProfile((profileName));
+    public String deleteProfiles(@PathParam("username") String username) {
+        profileService.deleteProfile((username));
         return "deleted";
     }
 }

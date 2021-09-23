@@ -2,7 +2,10 @@ package Messenger.model;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 @XmlRootElement
 public class Message implements Serializable {
@@ -14,6 +17,10 @@ public class Message implements Serializable {
     private Date created;
     
     private String author;
+    
+    private Map<Long, Comment> comments = new HashMap<>();
+    
+    private Map<Long, Like> likes = new HashMap<>();
 
     public Message() {
     }
@@ -55,6 +62,24 @@ public class Message implements Serializable {
 
     public void setAuthor(String author) {
         this.author = author;
+    }
+    
+    @XmlTransient
+    public Map<Long, Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(Map<Long, Comment> comments) {
+        this.comments = comments;
+    }
+    
+    @XmlTransient
+    public Map<Long, Like> getLikes() {
+        return likes;
+    }
+
+    public void setLikes(Map<Long, Like> likes) {
+        this.likes = likes;
     }
 
     @Override

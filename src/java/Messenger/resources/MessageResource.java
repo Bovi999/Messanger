@@ -1,8 +1,12 @@
 package Messenger.resources;
 
+import Messenger.beans.MessageFilterBean;
 import Messenger.model.Message;
 import Messenger.service.MessageService;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
+import javax.ws.rs.BeanParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Produces;
@@ -13,7 +17,13 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PUT;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 @Path("/messages")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -26,38 +36,87 @@ public class MessageResource {
     MessageService messageService = new MessageService();
 
     @GET
-    public List<Message> getMessages() {
+    public List<Message> getMessages(@QueryParam("year") int year, @QueryParam("start") int start, @QueryParam("size") int size) {
+        if(year > 0){
+            return messageService.getAllMessagessForYear(year);
+        }
+        if(start > 0 && size > 0){
+            return messageService.getAllMessagessForYear(year);
+        }
+        
         return messageService.getAllMessages();
     }
     
-    @Path("/{id}")
     @GET
-    public Message getMessage(@PathParam("id") long id) {
-        return messageService.getMessage(id);
+    @Path("beanparam")
+    public String getFilterMessages(@BeanParam MessageFilterBean messageFilter) {
+        if(messageFilter.getYear() > 0){
+            //return messageService.getAllMessagessForYear(messageFilter.getYear());
+        }
+        if(messageFilter.getStart() > 0 && messageFilter.getSize() > 0){
+            //return messageService.getAllMessagesPaginated(messageFilter.getStart(), messageFilter.getSize());
+        }
+        //return messageService.getAllMessages();
+        return messageFilter.getAuth();
+    }
+    
+    @Path("/{messageId}")
+    @GET
+    public Response getMessage(@PathParam("messageId") long id) {
+        Message fetchedMessage = messageService.getMessage(id);
+        return Response.status(Status.FOUND).entity(fetchedMessage).build();
     }
     
     @POST
-    public Message createMessage( Message message){
-        return messageService.addMessage(message);
+    public Response createMessage( Message message, @Context UriInfo uriInfo) throws URISyntaxException{
+        Message newMessage =  messageService.addMessage(message);
+        String id = String.valueOf(newMessage.getId());
+        URI uri = uriInfo.getAbsolutePathBuilder().path(id).build();
+        //return Response.status(Status.CREATED).entity(newMessage).build();
+        return Response.created(uri).entity(newMessage).build();
     }
 
-    @Path("{id}")
+    @Path("{messageId}")
     @PUT
-    public Message updateMessage(@PathParam("id") Long id, Message message) {
+    public Message updateMessage(@PathParam("messageId") Long id, Message message) {
         message.setId(id);
         return messageService.updateMessage(message);
     }
     
-    @Path("{id}")
+    @Path("{messageId}")
     @DELETE
-    public void deleteMessage(@PathParam("id") long id){
+    public void deleteMessage(@PathParam("messageId") long id){
         messageService.removeMessage(id);
+    }
+    
+    @Path("coded")
+    @GET
+    public Response coded() {
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target("http://8.208.96.127:8080/CodeSales/shop/items");
+        Response book = target.request().get(Response.class);
+        return book;
     }
     
     @Path("test")
     @GET
-    public String test() {
-        return "test";
+    public String test(){
+        String path = context.getPath();
+        return path;
     }
     
+    @Path("{messageId}/comments")
+    public CommentResource comments(){
+        return new CommentResource();
+    }
+    
+    @Path("{messageId}/likes")
+    public LikeResource likes(){
+        return new LikeResource();
+    }
+    
+    @Path("{messageId}/shares")
+    public ShareResource shares(){
+        return new ShareResource();
+    }
 }
